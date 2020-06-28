@@ -1,0 +1,65 @@
+Chore list
+	Tied to Google ID
+
+Kids can upload pictures of chores, reads date/time from image
+Kids and parents can see uploaded images by week
+Parents can mark chores complete for a week
+Parents can unmark chores as complete
+Family can see details of chore, including images, who it started with, who it is assigned to, who checked it off, and when it was checked off
+
+
+Compute Week Id (date)
+	Determines the Sunday before or of the specified date, returns the date in yyyyMMdd format as an integer
+
+Get Current Chores (idToken, weekId) - Must be authenticated
+	Verify date is after global startDate, else return 500
+	Computes week id
+	Reads current chore list from /chores/{weekId}/chores.json
+		If it doesn't exist:
+			While it doesn't exist
+				Subtract a week from the date, compute new weekId
+				Check if chores.json exists for that week
+			Determine who has which chore
+			Advanced the date forward a week at a time, assuming everyone completes their chores
+			If the advanced date is today or before, write out the assumption to storage, otherwise just keep in memory
+	Returns chores.json
+		Includes:
+			Who each chore is currently assigned to
+			Who it started with
+			URLs for images grouped by choreId
+			Who checked it off
+			When it was checked off
+
+Upload image(idToken, choreId, weekId, image) - Must be authenticated
+	Verify choreId is valid, if not return 500
+	Read date from image, if no date return 500
+	Compute week id from date
+	Verify computed week id matches weekId passed in, else return 500
+	Save image to /chores/{weekId}/{GUID}.jpg
+	Update chores.json to include image URL
+	Save chores.json to Azure storage
+	Returns chores.json
+
+Set Chore Complete (idToken, weekId, choreId, complete) - Must be parent
+	Verify choreId is valid, if not return 500
+	Computes week id
+	Reads current chore list from /chores/{weekId}/chores.json
+	If complete matches current complete, return 200
+	Update chores.json to show who is marking it complete and when
+	Save chores.json to Azure storage
+	Returns chores.json
+
+
+
+Important Links
+	Authorization in static web-app: https://docs.microsoft.com/en-us/azure/static-web-apps/authentication-authorization
+	Enable Google Sign-in: https://developers.google.com/identity/sign-in/web/sign-in
+	Checklist CSS/HTML: https://codepen.io/designcouch/pen/rIEHk
+	Creating a static web-app: https://docs.microsoft.com/en-us/azure/static-web-apps/getting-started?tabs=vue
+	Multi-part upload: https://stackoverflow.com/questions/50526133/how-to-upload-a-file-using-node-js-function-in-azure
+	Storage SDK for javascript: https://www.npmjs.com/package/azure-storage
+
+https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference
+https://docs.microsoft.com/en-us/azure/azure-functions/functions-bindings-storage-blob-input?tabs=javascript
+https://docs.microsoft.com/en-us/azure/azure-functions/functions-reference-node
+https://docs.microsoft.com/en-us/azure/javascript/node-howto-write-serverless-code
