@@ -18,13 +18,6 @@
         "name": "choresIn",
         "type": "blob",
         "path": "chores/{weekId}/chores.json",
-        "connection": "",
-        "direction": "in"
-      },
-      {
-        "name": "choresIn",
-        "type": "blob",
-        "path": "chores/{weekId}/chores.json",
         "connection": "RANDOM_STRING_NAME",
         "direction": "in"
       }
