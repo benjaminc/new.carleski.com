@@ -15,18 +15,18 @@
       "name": "res"
     },
     {
+      "name": "baseChores",
+      "type": "blob",
+      "path": "chores/baseChores.json",
+      "connection": "AzureWebJobsStorage",
+      "direction": "in"
+    },
+    {
       "name": "choresIn",
       "type": "blob",
       "path": "chores/{weekId}/chores.json",
       "connection": "AzureWebJobsStorage",
       "direction": "in"
-    },
-    {
-      "name": "choresOut",
-      "type": "blob",
-      "path": "chores/{weekId}/chores.json",
-      "connection": "AzureWebJobsStorage",
-      "direction": "out"
     }
   ]
 }

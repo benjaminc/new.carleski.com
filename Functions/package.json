@@ -6,8 +6,6 @@
     "start": "func start",
     "test": "echo \"No tests yet...\""
   },
-  "dependencies": {
-    "google-auth-library": "^6.0.2"
-  },
+  "dependencies": {},
   "devDependencies": {}
 }

@@ -5,54 +5,71 @@
 //     Update chores.json to show who is marking it complete and when
 //     Save chores.json to Azure storage
 //     Returns chores.json
+// WeekId = Math.round(Date.now() / (7 * 24 * 60 * 60 * 1000))
+// This rolls over around 5 AM Sunday morning on GMT-8, or 6 AM Sunday morning on GMT-7
 const shared = require('../common/shared');
+const https = require('https');
 
-function validateRequest(context, body, chores) {
-    if (!body || typeof body.token !== 'string' || !body.token) {
-        context.log('No valid ID token present in the request body');
-        context.res = { statusCode: 500 };
+function validateRequest(context, req, chores) {
+    let result = shared.verify(req, chores);
+    if (!result || !result.chore || typeof req.body.complete !== 'boolean') {
+        context.log('Invalid request - ' + JSON.stringify(req));
+        context.res = { status: 500 };
         return false;
     }
 
-    if (typeof body.choreId !== 'number' || body.choreId <= 0 || !chores[body.choreId]) {
-        context.log('No valid chore ID present in the request body');
-        context.res = { statusCode: 500 };
-        return false;
-    }
-
-    if (typeof body.complete !== 'boolean') {
-        context.log('No valid complete field present in the request body');
-        context.res = { statusCode: 500 };
-        return false;
-    }
-
-    var auth = await shared.verify(body.token);
-    if (!auth || !auth.user || !auth.user.isParent) {
+    if (!result.auth.user.isParent) {
         context.log('Not a parent making the request');
-        context.res = { statusCode: 403 };
+        context.res = { status: 403 };
         return false;
     }
 
-    var chore = chores[body.choreId];
-    if (chore.complete === body.complete) {
+    result.complete = (req.query.complete === "true" || req.query.complete === true);
+    if (result.chore.complete === result.complete) {
         context.log('Complete status already set to requested status');
-        context.res = { statusCode: 200 };
+        context.res = { status: 200 };
         return false;
     }
 
-    return {auth, chore};
+    return result;
+}
+
+async function updateNextWeek(req, nextWeekId, chore) {
+    const url = new URL('AssignChore?weekId=' + nextWeekId
+        + '&choreId=' + encodeURIComponent(chore.choreId)
+        + '&assignedTo=' + encodeURIComponent(chore.assignedTo),
+        req.url);
+
+    await fetch(url, {
+        cache: 'no-cache',
+        headers: {
+            'x-ms-client-principal': req.headers['x-ms-client-principal']
+        }
+    });
 }
 
 module.exports = async function (context, req) {
-    context.log('JavaScript HTTP trigger function processed a request.');
+    context.log('Got SetChoreComplete request');
 
-    var chores = context.bindings.choresIn;
-    var result = validateRequest(context, req.body, chores);
+    var result = validateRequest(context, req, context.bindings.choresIn);
     if (!result) return;
 
-    context.log('Setting complete status of ' + result.chore.name + ' to ' + req.body.complete + ' by ' + result.auth.user.name);
-    chore.complete = req.body.complete;
-    context.bindings.choresOut = chores;
+    var chore = result.chore;
+    var complete = result.complete;
+    var reviewer = result.auth.user.name;
+    context.log('Setting complete status of ' + chore.name + ' to ' + complete + ' by ' + result.auth.user.name);
 
-    context.res = {statusCode:200};
+    chore.history.push({complete,by:reviewer,at:new Date().toString()});
+    if (complete && chore.assignedTo === chore.defaultAssignedTo) {
+        chore.complete = true;
+        chore.assignedTo = chore.nextAssignedTo;
+    } else {
+        chore.complete = false;
+        chore.assignedTo = chore.defaultAssignedTo;
+    }
+    context.bindings.choresOut = result.chores;
+
+    await updateNextWeek(req, result.weekId + 1, result.chore);
+
+    context.res = {status:200};
 };
