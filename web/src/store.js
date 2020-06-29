@@ -17,6 +17,10 @@ const store = {
     var resp = await fetch(API_PATH + 'GetChores?weekId=' + encodeURIComponent(weekId), {
       cache: 'no-cache'
     })
+    if (resp.status !== 200) {
+      if (me.debug) console.log('Invalid GetChores Response - ' + resp.status)
+      return null;
+    }
     const body = await resp.json()
     const data = typeof body === 'string' ? JSON.parse(body) : body
     me.state.weeks[weekId] = data
@@ -28,10 +32,13 @@ const store = {
   },
   setChoreComplete: async function (weekId, choreId, complete) {
     const me = this
-    await fetch(API_PATH + 'SetChoreComplete?weekId=' + encodeURIComponent(weekId) + '&choreId=' + encodeURIComponent(choreId) + '&complete=' + (complete === true), {
+    const resp = await fetch(API_PATH + 'SetChoreComplete?weekId=' + encodeURIComponent(weekId) + '&choreId=' + encodeURIComponent(choreId) + '&complete=' + (complete === true), {
       cache: 'no-cache'
     })
 
+    if (resp.status !== 200) {
+      if (me.debug) console.log('Invalid SetChoreComplete Response - ' + resp.status)
+    }
     me.getWeek(weekId, true)
   }
 }

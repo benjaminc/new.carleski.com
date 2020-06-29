@@ -9,8 +9,29 @@
             "serve": "/.auth/logout"
         },
         {
+            "route": "/api/SetChoreComplete",
+            "allowedRoles": ["parent"]
+        },
+        {
+            "route": "/api/AssignChore",
+            "allowedRoles": ["parent"]
+        },
+        {
+            "route": "/api/*",
+            "allowedRoles": ["authenticated"]
+        },
+        {
             "route": "/*",
-            "serve": "/index.html"
+            "serve": "/index.html",
+            "statusCode": 200,
+            "allowedRoles": ["authenticated"]
         }
+    ],
+    "platformErrorOverrides": [
+      {
+        "errorType": "Unauthenticated",
+        "statusCode": "302",
+        "serve": "/login"
+      }
     ]
 }
