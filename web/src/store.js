@@ -19,7 +19,7 @@ const store = {
     })
     if (resp.status !== 200) {
       if (me.debug) console.log('Invalid GetChores Response - ' + resp.status)
-      return null;
+      return null
     }
     const body = await resp.json()
     const data = typeof body === 'string' ? JSON.parse(body) : body
