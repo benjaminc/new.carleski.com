@@ -2,18 +2,18 @@ const KNOWN_USERS = JSON.parse(process.env.KNOWN_USERS);
 const DEFAULT_PRINCIPAL = typeof process.env.DEFAULT_PRINCIPAL === 'string' && process.env.DEFAULT_PRINCIPAL.length > 0 ? process.env.DEFAULT_PRINCIPAL : null;
 
 function verify(req, chores, baseChores) {
-    if (!req || typeof req.query !== 'object') return null;
+    if (!req || typeof req.query !== 'object') return "No valid request information";
 
     const weekId = parseInt(req.query.weekId);
-    if (!Number.isInteger(weekId) || weekId <= 2634 || weekId >= 20000) return null;
+    if (!Number.isInteger(weekId) || weekId <= 2634 || weekId >= 20000) return "Missing week";
     if (typeof chores === 'string') chores = JSON.parse(chores);
     if (typeof chores !== 'object') chores = generateNewWeek(weekId, baseChores);
 
     const header = req.headers["x-ms-client-principal"] || DEFAULT_PRINCIPAL;
-    if (typeof header !== 'string' || !header || header.length === 0) return null;
+    if (typeof header !== 'string' || !header || header.length === 0) return "Missing authentication header";
     const encoded = Buffer.from(header, "base64");
     const auth = JSON.parse(encoded.toString("ascii"));
-    if (!auth || !KNOWN_USERS[auth.userDetails]) return null;
+    if (!auth || !KNOWN_USERS[auth.userDetails]) return "Unknown user";
 
     auth.user = KNOWN_USERS[auth.userDetails];
     auth.user.isParent = auth.userRoles.indexOf('parent') >= 0;

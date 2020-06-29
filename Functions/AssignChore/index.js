@@ -1,47 +1,17 @@
-/*
-input example:
-{
-    "Kitchen": "George",
-    "Bathrooms": "Calvin"
-}
-chores.json example:
-{
-    weekId: 2645,
-    chores: [
-        {
-            "choreId": "kitchen",
-            "complete": true,
-            "history": [
-                {complete:true,by:'Dad',at:'Saturday June 27, 2020 11:21:01 AM'}
-            ]
-            "defaultAssignee": 'Robert',
-            "nextAssignee": 'George',
-            "assignedTo": 'George',
-            "name": "Kitchen",
-            "images": [
-                {"at":"Saturday June 27, 2020 2:41:52 AM", by:"Robert", url:"https://blob.azure.net/image/path"}
-            ]
-            "schedules": [
-                {
-                    "name": "Daily",
-                    "tasks": [
-                        { "name": "Empty the dishwasher in the morning", "exampleUrl": "https://blob.azure.net/image/path" }
-                    ]
-                }
-            ]
-        }
-    ]
-}
-*/
-
 const shared = require("../common/shared");
 
 function validateRequest(context, req, chores, baseChores) {
     let result = shared.verify(req, chores, baseChores);
 
-    if (!result || typeof req.query.assignedTo !== 'string' || req.query.assignedTo.length === 0) {
+    if (typeof result !== 'object' || typeof req.query.assignedTo !== 'string' || req.query.assignedTo.length === 0) {
         context.log('Invalid request - ' + JSON.stringify(req));
         context.res = { status: 500 };
+
+        if (typeof result === 'string') context.res.body = result;
+        else if (typeof req.query.assignedTo !== 'string') context.res.body = 'Missing assignedTo';
+        else if (req.query.assignedTo.length === 0) context.res.body = 'Empty assignedTo';
+        else context.res.body = 'An unknown error has occurred';
+
         return false;
     }
 

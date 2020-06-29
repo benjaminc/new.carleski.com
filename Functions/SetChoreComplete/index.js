@@ -1,20 +1,17 @@
-// Set Chore Complete (idToken, weekId, choreId, complete) - Must be parent
-//     Verify choreId is valid, if not return 500
-//     Reads current chore list from /chores/{weekId}/chores.json
-//     If complete matches current complete, return 200
-//     Update chores.json to show who is marking it complete and when
-//     Save chores.json to Azure storage
-//     Returns chores.json
-// WeekId = Math.round(Date.now() / (7 * 24 * 60 * 60 * 1000))
-// This rolls over around 5 AM Sunday morning on GMT-8, or 6 AM Sunday morning on GMT-7
 const shared = require('../common/shared');
 const https = require('https');
 
 function validateRequest(context, req, chores) {
     let result = shared.verify(req, chores);
-    if (!result || !result.chore || typeof req.body.complete !== 'boolean') {
+    if (typeof result !== 'object' || !result.chore || typeof req.body.complete !== 'boolean') {
         context.log('Invalid request - ' + JSON.stringify(req));
         context.res = { status: 500 };
+
+        if (typeof result === 'string') context.res.body = result;
+        else if (result && !result.chore) context.res.body = 'Unknown chore';
+        else if (result && typeof req.body.complete !== 'boolean') context.res.body = 'Missing complete specification';
+        else context.res.body = 'An unknown error has occurred';
+
         return false;
     }
 
