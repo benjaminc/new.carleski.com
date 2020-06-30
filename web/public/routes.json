@@ -29,6 +29,10 @@
             "allowedRoles": ["anonymous"]
         },
         {
+            "route": "/favicon.ico",
+            "allowedRoles": ["anonymous"]
+        },
+        {
             "route": "/",
             "serve": "/index.html",
             "allowedRoles": ["anonymous"]

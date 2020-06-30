@@ -1,13 +1,13 @@
 const KNOWN_USERS = JSON.parse(process.env.KNOWN_USERS);
 const DEFAULT_PRINCIPAL = typeof process.env.DEFAULT_PRINCIPAL === 'string' && process.env.DEFAULT_PRINCIPAL.length > 0 ? process.env.DEFAULT_PRINCIPAL : null;
 
-function verify(req, chores, baseChores) {
+async function verify(req, chores, baseChores) {
     if (!req || typeof req.query !== 'object') return "No valid request information";
 
     const weekId = parseInt(req.query.weekId);
     if (!Number.isInteger(weekId) || weekId <= 2634 || weekId >= 20000) return "Missing week";
     if (typeof chores === 'string') chores = JSON.parse(chores);
-    if (typeof chores !== 'object') chores = generateNewWeek(weekId, baseChores);
+    if (typeof chores !== 'object') chores = await generateNewWeek(req.url, weekId, baseChores);
 
     const header = req.headers["x-ms-client-principal"] || DEFAULT_PRINCIPAL;
     if (typeof header !== 'string' || !header || header.length === 0) return "Missing authentication header";
@@ -40,7 +40,15 @@ function getChore(chores, choreId) {
     return null;
 }
 
-function generateNewWeek(weekId, baseChores) {
+async function generateNewWeek(url, weekId, baseChores) {
+    if (weekId > 2635) {
+        const resp = await fetch(new URL('GetChores?weekId=' + (weekId - 1), url));
+        if (resp.status === 200) {
+            const payload = await resp.json();
+            if (payload && payload.weekId) return payload;
+        }
+    }
+
     if (typeof baseChores === 'string') baseChores = JSON.parse(baseChores);
     let chores = typeof baseChores === 'object' ? {...baseChores} : {chores:[]};
     chores.weekId = weekId;

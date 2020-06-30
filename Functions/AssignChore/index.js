@@ -1,7 +1,7 @@
 const shared = require("../common/shared");
 
-function validateRequest(context, req, chores, baseChores) {
-    let result = shared.verify(req, chores, baseChores);
+async function validateRequest(context, req, chores, baseChores) {
+    let result = await shared.verify(req, chores, baseChores);
 
     if (typeof result !== 'object' || typeof req.query.assignedTo !== 'string' || req.query.assignedTo.length === 0) {
         context.log('Invalid request - ' + JSON.stringify(req));
@@ -23,7 +23,7 @@ function validateRequest(context, req, chores, baseChores) {
 module.exports = async function (context, req) {
     context.log('Got UpdateChores request');
 
-    const result = validateRequest(context, req, context.bindings.choresIn, context.bindings.baseChores);
+    const result = await validateRequest(context, req, context.bindings.choresIn, context.bindings.baseChores);
     if (!result) return;
 
     result.chore.assignedTo = result.assignedTo;

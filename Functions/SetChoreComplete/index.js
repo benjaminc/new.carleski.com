@@ -1,8 +1,8 @@
 const shared = require('../common/shared');
 const https = require('https');
 
-function validateRequest(context, req, chores) {
-    let result = shared.verify(req, chores);
+async function validateRequest(context, req, chores) {
+    let result = await shared.verify(req, chores);
     if (typeof result !== 'object' || !result.chore || typeof req.body.complete !== 'boolean') {
         context.log('Invalid request - ' + JSON.stringify(req));
         context.res = { status: 500 };
@@ -48,7 +48,7 @@ async function updateNextWeek(req, nextWeekId, chore) {
 module.exports = async function (context, req) {
     context.log('Got SetChoreComplete request');
 
-    var result = validateRequest(context, req, context.bindings.choresIn);
+    var result = await validateRequest(context, req, context.bindings.choresIn);
     if (!result) return;
 
     var chore = result.chore;
