@@ -1,15 +1,17 @@
 const shared = require('../common/shared');
 const https = require('https');
+const axios = require('axios');
 
 async function validateRequest(context, req, chores) {
+    const complete = typeof req.query.complete === 'string' && (req.query.complete === 'true' || req.query.complete === 'false') ? req.query.complete === 'true' : req.query.complete;
     let result = await shared.verify(req, chores);
-    if (typeof result !== 'object' || !result.chore || typeof req.body.complete !== 'boolean') {
+    if (typeof result !== 'object' || !result.chore || typeof complete !== 'boolean') {
         context.log('Invalid request - ' + JSON.stringify(req));
         context.res = { status: 500 };
 
         if (typeof result === 'string') context.res.body = result;
         else if (result && !result.chore) context.res.body = 'Unknown chore';
-        else if (result && typeof req.body.complete !== 'boolean') context.res.body = 'Missing complete specification';
+        else if (result && typeof complete !== 'boolean') context.res.body = 'Missing complete specification';
         else context.res.body = 'An unknown error has occurred';
 
         return false;
@@ -21,12 +23,13 @@ async function validateRequest(context, req, chores) {
         return false;
     }
 
-    result.complete = (req.query.complete === "true" || req.query.complete === true);
-    if (result.chore.complete === result.complete) {
+    if (result.chore.complete === complete) {
         context.log('Complete status already set to requested status');
         context.res = { status: 200 };
         return false;
     }
+
+    result.complete = complete;
 
     return result;
 }
@@ -36,13 +39,13 @@ async function updateNextWeek(req, nextWeekId, chore) {
         + '&choreId=' + encodeURIComponent(chore.choreId)
         + '&assignedTo=' + encodeURIComponent(chore.assignedTo),
         req.url);
+    
+    let headers = {
+        'Cache-Control': 'no-cache'
+    };
+    if (req.headers['x-ms-client-principal']) headers['x-ms-client-principal'] = req.headers['x-ms-client-principal'];
 
-    await fetch(url, {
-        cache: 'no-cache',
-        headers: {
-            'x-ms-client-principal': req.headers['x-ms-client-principal']
-        }
-    });
+    await axios.get(url.href, { headers });
 }
 
 module.exports = async function (context, req) {
@@ -57,12 +60,12 @@ module.exports = async function (context, req) {
     context.log('Setting complete status of ' + chore.name + ' to ' + complete + ' by ' + result.auth.user.name);
 
     chore.history.push({complete,by:reviewer,at:new Date().toString()});
-    if (complete && chore.assignedTo === chore.defaultAssignedTo) {
+    if (complete && chore.assignedTo === chore.defaultAssignee) {
         chore.complete = true;
-        chore.assignedTo = chore.nextAssignedTo;
+        chore.assignedTo = chore.nextAssignee;
     } else {
         chore.complete = false;
-        chore.assignedTo = chore.defaultAssignedTo;
+        chore.assignedTo = chore.defaultAssignee;
     }
     context.bindings.choresOut = result.chores;
 

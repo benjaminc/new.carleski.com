@@ -6,7 +6,7 @@
                 <div>Return to chores list</div>
             </router-link>
         </div>
-        <div v-if="!chore || !week">Loading the chore...</div>
+        <div v-if="!chore || !state.currentWeek">Loading the chore...</div>
         <div v-else>
             <h1>{{chore.name}} for the week from {{startDate | formatDate}} to {{endDate | formatDate}}</h1>
             <div class="attribute-list">
@@ -66,7 +66,7 @@ export default {
   components: { ChevronLeft, Images, QuestionCircle },
   data: function () {
     return {
-      week: null,
+      state: store.state,
       chore: null,
       selectedSchedule: null,
       selectedTask: null
@@ -103,8 +103,8 @@ export default {
     },
     loadWeek: async function () {
       const choreId = this.$route.params.choreId
-      if (this.$route.params.weekId) this.week = await store.getWeek(this.$route.params.weekId)
-      const chores = this.week && this.week.chores
+      const week = this.$route.params.weekId ? await store.setWeek(this.$route.params.weekId) : null
+      const chores = week && week.chores
       if (chores && chores.length && choreId) {
         for (let i = 0; i < chores.length; i++) {
           if (chores[i].choreId === choreId) {

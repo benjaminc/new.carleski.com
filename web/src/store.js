@@ -1,30 +1,47 @@
 const API_PATH = process.env.VUE_APP_API_PATH
+const DEFAULT_USER = process.env.VUE_APP_DEFAULT_USER ? JSON.parse(process.env.VUE_APP_DEFAULT_USER) : null
 
 const store = {
   debug: true,
   state: {
-    weeks: {}
+    weeks: localStorage.weeks ? JSON.parse(localStorage.weeks) : {},
+    currentWeek: null,
+    currentWeekId: null,
+    user: DEFAULT_USER
   },
-  getWeek: async function (weekId, forceRefresh) {
+  setUser: function (user) {
+    this.user = user
+  },
+  setWeek: function (weekId) {
     const me = this
-    if (me.debug) console.log('Getting week ' + weekId)
-    if (!forceRefresh && me.state.weeks[weekId]) {
-      if (me.debug) console.log('Got week from cache')
-      return me.state.weeks[weekId]
-    }
 
-    if (me.debug) console.log('Getting from server')
-    var resp = await fetch(API_PATH + 'GetChores?weekId=' + encodeURIComponent(weekId), {
-      cache: 'no-cache'
+    if (me.debug) console.log('Setting week ' + weekId)
+    me.state.currentWeekId = weekId
+    me.state.currentWeek = me.state.weeks[weekId]
+
+    return new Promise(function (resolve, reject) {
+      if (me.debug) console.log('Getting from server')
+      fetch(API_PATH + 'GetChores?weekId=' + encodeURIComponent(weekId), {
+        cache: 'no-cache'
+      }).then(function (resp) {
+        if (resp.status !== 200) {
+          if (me.debug) console.log('Invalid GetChores Response - ' + resp.status)
+          reject(new Error('Invalid GetChores Response - ' + resp.status))
+        } else {
+          resp.json().then(function (body) {
+            const data = typeof body === 'string' ? JSON.parse(body) : body
+            me.state.weeks[weekId] = data
+            localStorage.weeks = JSON.stringify(me.state.weeks)
+            if (me.state.currentWeekId === weekId) me.state.currentWeek = data
+            resolve(data)
+          }, function (err) {
+            reject(err)
+          })
+        }
+      }, function (err) {
+        reject(err)
+      })
     })
-    if (resp.status !== 200) {
-      if (me.debug) console.log('Invalid GetChores Response - ' + resp.status)
-      return null
-    }
-    const body = await resp.json()
-    const data = typeof body === 'string' ? JSON.parse(body) : body
-    me.state.weeks[weekId] = data
-    return data
   },
   computeWeekId: function (date) {
     const ms = date ? date.getTime() : Date.now()
@@ -39,7 +56,7 @@ const store = {
     if (resp.status !== 200) {
       if (me.debug) console.log('Invalid SetChoreComplete Response - ' + resp.status)
     }
-    me.getWeek(weekId, true)
+    await me.setWeek(weekId)
   }
 }
 

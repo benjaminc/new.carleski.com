@@ -1,10 +1,10 @@
 <template>
   <div class="listContainer">
-      <div v-if="!week">Loading the current week...</div>
+      <div v-if="!state.currentWeek">Loading the current week...</div>
       <div v-else>
           <h1>Chores for the week from {{startDate | formatDate}} to {{endDate | formatDate}}</h1>
           <div class="chore-list">
-              <ChoreItem v-for="chore in week.chores" :key="chore.choreId" :chore="chore" :weekId="$route.params.weekId" />
+              <ChoreItem v-for="chore in state.currentWeek.chores" :key="chore.choreId" :chore="chore" :weekId="$route.params.weekId" />
           </div>
       </div>
   </div>
@@ -17,7 +17,7 @@ export default {
   components: { ChoreItem },
   data: function () {
     return {
-      week: null
+      state: store.state
     }
   },
   computed: {
@@ -41,7 +41,7 @@ export default {
   },
   methods: {
     loadWeek: async function () {
-      if (this.$route.params.weekId) this.week = await store.getWeek(this.$route.params.weekId)
+      if (this.$route.params.weekId) await store.setWeek(this.$route.params.weekId)
     }
   },
   watch: {

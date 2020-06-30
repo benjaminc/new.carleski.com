@@ -21,7 +21,7 @@ async function validateRequest(context, req, chores, baseChores) {
 }
 
 module.exports = async function (context, req) {
-    context.log('Got UpdateChores request');
+    context.log('Got AssignChore request');
 
     const result = await validateRequest(context, req, context.bindings.choresIn, context.bindings.baseChores);
     if (!result) return;

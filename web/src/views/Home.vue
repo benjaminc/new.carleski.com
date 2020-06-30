@@ -9,8 +9,10 @@ export default {
     const response = await fetch('/.auth/me')
     if (response.status === 200) {
       const payload = await response.json()
-      if (payload && payload.clientPrincipal) this.$router.push('/list/' + store.computeWeekId())
-      else window.location = '/login'
+      if (payload && payload.clientPrincipal) {
+        store.setUser(payload.clientPrincipal)
+        this.$router.push('/list/' + store.computeWeekId())
+      } else window.location = '/login'
     } else window.location = '/login'
   }
 }

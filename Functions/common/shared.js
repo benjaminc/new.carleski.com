@@ -1,5 +1,6 @@
 const KNOWN_USERS = JSON.parse(process.env.KNOWN_USERS);
 const DEFAULT_PRINCIPAL = typeof process.env.DEFAULT_PRINCIPAL === 'string' && process.env.DEFAULT_PRINCIPAL.length > 0 ? process.env.DEFAULT_PRINCIPAL : null;
+const axios = require('axios');
 
 async function verify(req, chores, baseChores) {
     if (!req || typeof req.query !== 'object') return "No valid request information";
@@ -7,7 +8,7 @@ async function verify(req, chores, baseChores) {
     const weekId = parseInt(req.query.weekId);
     if (!Number.isInteger(weekId) || weekId <= 2634 || weekId >= 20000) return "Missing week";
     if (typeof chores === 'string') chores = JSON.parse(chores);
-    if (typeof chores !== 'object') chores = await generateNewWeek(req.url, weekId, baseChores);
+    if (typeof chores !== 'object') chores = await generateNewWeek(req, weekId, baseChores);
 
     const header = req.headers["x-ms-client-principal"] || DEFAULT_PRINCIPAL;
     if (typeof header !== 'string' || !header || header.length === 0) return "Missing authentication header";
@@ -31,7 +32,7 @@ async function verify(req, chores, baseChores) {
 
 function getChore(chores, choreId) {
     if (typeof(choreId) === 'string' && choreId.length > 0 && typeof chores === 'object' && chores && chores.length) {
-        for (let i = 0; i < chores.length && !result.chore; i++) {
+        for (let i = 0; i < chores.length; i++) {
             if (chores[i].choreId !== choreId) continue;
             return chores[i];
         }
@@ -40,11 +41,16 @@ function getChore(chores, choreId) {
     return null;
 }
 
-async function generateNewWeek(url, weekId, baseChores) {
+async function generateNewWeek(req, weekId, baseChores) {
     if (weekId > 2635) {
-        const resp = await fetch(new URL('GetChores?weekId=' + (weekId - 1), url));
+        let headers = {
+            'Cache-Control': 'no-cache'
+        };
+        if (req.headers['x-ms-client-principal']) headers['x-ms-client-principal'] = req.headers['x-ms-client-principal'];
+
+        const resp = await axios.get(new URL('GetChores?weekId=' + (weekId - 1), req.url).href, {headers});
         if (resp.status === 200) {
-            const payload = await resp.json();
+            const payload = resp.data;
             if (payload && payload.weekId) return payload;
         }
     }

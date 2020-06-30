@@ -2,7 +2,7 @@
   <span class="chore-wrap" @click.prevent.stop="$router.push('/detail/' + weekId + '/' + chore.choreId)">
     <input type="checkbox" :id="id" :checked="chore.complete" />
     <span class="checknext">
-        <span class="checkmark" @click.prevent.stop="chore.complete = !chore.complete">
+        <span class="checkmark" @click.prevent.stop="toggleComplete" v-if="isParent">
             <Check />
         </span>
         <label :for="id" class="chore">
@@ -24,6 +24,11 @@ import InfoCircle from '../assets/info-circle.svg'
 export default {
   components: { Check, Images, InfoCircle },
   props: ['weekId', 'chore'],
+  data: function () {
+    return {
+      state: store.state
+    }
+  },
   computed: {
     id: function () {
       return 'chore-' + this.chore.choreId
@@ -42,6 +47,15 @@ export default {
       }
 
       return false
+    },
+    isParent: function () {
+      const hasRole = this.state.user && this.state.user.userRoles ? this.state.user.userRoles.indexOf('parent') > 0 : false
+      return hasRole
+    }
+  },
+  methods: {
+    toggleComplete: function () {
+      this.chore.complete = !this.chore.complete
     }
   },
   watch: {
