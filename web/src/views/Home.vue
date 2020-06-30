@@ -7,9 +7,11 @@ import store from '../store'
 export default {
   mounted: async function () {
     const response = await fetch('/.auth/me')
-    const payload = await response.json()
-    if (!payload) window.location = '/login'
-    else this.$router.push('/list/' + store.computeWeekId())
+    if (response.status === 200) {
+      const payload = await response.json()
+      if (payload && payload.clientPrincipal) this.$router.push('/list/' + store.computeWeekId())
+      else window.location = '/login'
+    } else window.location = '/login'
   }
 }
 </script>
