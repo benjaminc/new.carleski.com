@@ -21,14 +21,20 @@
             "allowedRoles": ["authenticated"]
         },
         {
-            "route": "/",
-            "serve": "/index.html"
-        },
-        {
-            "route": "/*",
+            "route": "/list/*",
             "serve": "/index.html",
             "statusCode": 200,
             "allowedRoles": ["authenticated"]
+        },
+        {
+            "route": "/detail/*",
+            "serve": "/index.html",
+            "statusCode": 200,
+            "allowedRoles": ["authenticated"]
+        },
+        {
+            "route": "/",
+            "serve": "/index.html"
         }
     ],
     "platformErrorOverrides": [
