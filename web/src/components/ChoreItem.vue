@@ -49,7 +49,7 @@ export default {
       return false
     },
     isParent: function () {
-      const hasRole = this.state.user && this.state.user.userRoles ? this.state.user.userRoles.indexOf('parent') > 0 : false
+      const hasRole = this.state.user && this.state.user.userRoles ? this.state.user.userRoles.indexOf('parent') >= 0 : false
       return hasRole
     }
   },
