@@ -1,0 +1,41 @@
+{
+    "bindings": [
+      {
+        "authLevel": "anonymous",
+        "type": "httpTrigger",
+        "direction": "in",
+        "name": "req",
+        "dataType": "binary",
+        "methods": [
+          "post"
+        ]
+      },
+      {
+        "type": "http",
+        "direction": "out",
+        "name": "res"
+      },
+      {
+        "name": "baseChores",
+        "type": "blob",
+        "path": "chores/baseChores.json",
+        "connection": "CHORES_JSON_DATA",
+        "direction": "in"
+      },
+      {
+        "name": "choresIn",
+        "type": "blob",
+        "path": "chores/{weekId}/chores.json",
+        "connection": "CHORES_JSON_DATA",
+        "direction": "in"
+      },
+      {
+        "name": "choresOut",
+        "type": "blob",
+        "path": "chores/{weekId}/chores.json",
+        "connection": "CHORES_JSON_DATA",
+        "direction": "out"
+      }
+    ]
+  }
+  

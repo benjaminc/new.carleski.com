@@ -17,19 +17,23 @@
                 <div class="attribute-item">
                     <div class="header">Status:</div>
                     <div class="simple-detail">{{chore.complete ? 'Passed Off' : 'Not Passed Off'}}</div>
-                </div>
+                </div><form>
                 <div class="schedule" v-for="schedule in chore.schedules" :key="schedule.alias">
                     <div class="header">{{schedule.name}}</div>
                     <div class="tasks">
                         <ol>
                             <li class="task" v-for="task in schedule.tasks" :key="task.name">
                                 <div class="header">
-                                    <a @click.prevent.stop="toggleTask(schedule, task)" v-if="task.exampleUrl || task.imageUrls.length">
+                                    <a href="#" @click.prevent.stop="toggleTask(schedule, task)" v-if="task.exampleUrl || task.imageUrls.length">
                                         {{task.name}}
-                                        <QuestionCircle v-if="task.exampleUrl" />
                                         <Images v-if="task.imageUrls.length" />
+                                        <QuestionCircle v-if="!isParent && task.exampleUrl" />
                                     </a>
                                     <span v-else>{{task.name}}</span>
+                                    <label v-if="isParent">
+                                      <QuestionCircle />
+                                      <input type="file" accept="image/*" capture="camera" style="display:none" @change="uploadFile(schedule, task, $event)" />
+                                    </label>
                                 </div>
                                 <div class="details" v-show="selectedSchedule === schedule.alias && selectedTask === task.name">
                                     <div class="example" v-if="task.exampleUrl">
@@ -47,7 +51,7 @@
                             </li>
                         </ol>
                     </div>
-                </div>
+                </div></form>
                 <div class="history-items" v-if="chore.history.length">
                     <div class="header">Historical Actions</div>
                     <div class="history-item" v-for="item in chore.history" :key="item.at">{{item.complete ? 'Completed' : 'Uncompleted'}} at {{item.at}} by {{item.by}}</div>
@@ -82,6 +86,10 @@ export default {
     endDate: function () {
       const startDate = this.startDate
       return new Date(startDate.getTime() + (6 * 24 * 60 * 60 * 1000))
+    },
+    isParent: function () {
+      const hasRole = this.state.user && this.state.user.userRoles ? this.state.user.userRoles.indexOf('parent') > 0 : false
+      return hasRole
     }
   },
   filters: {
@@ -113,6 +121,14 @@ export default {
           }
         }
       }
+    },
+    uploadFile: async function (schedule, task, event) {
+      await store.uploadExampleImage(
+        this.$route.params.weekId,
+        this.$route.params.choreId,
+        schedule.alias,
+        task.name,
+        event.target.files[0])
     }
   },
   watch: {
@@ -186,7 +202,12 @@ export default {
 .task > .header {
     text-align: left;
 }
+.task > .header a {
+  color: #3540eb;
+  text-decoration: none;
+}
 .task svg {
+    margin-left: 8px;
     width: 16px;
     height: 16px;
 }

@@ -15,6 +15,13 @@
       "name": "res"
     },
     {
+      "name": "baseChores",
+      "type": "blob",
+      "path": "chores/baseChores.json",
+      "connection": "CHORES_JSON_DATA",
+      "direction": "in"
+    },
+    {
       "name": "choresIn",
       "type": "blob",
       "path": "chores/{weekId}/chores.json",

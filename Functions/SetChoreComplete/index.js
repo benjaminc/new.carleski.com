@@ -1,5 +1,4 @@
 const shared = require('../common/shared');
-const https = require('https');
 const axios = require('axios');
 
 async function validateRequest(context, req, chores) {
@@ -51,7 +50,7 @@ async function updateNextWeek(req, nextWeekId, chore) {
 module.exports = async function (context, req) {
     context.log('Got SetChoreComplete request');
 
-    var result = await validateRequest(context, req, context.bindings.choresIn);
+    var result = await validateRequest(context, req, context.bindings.choresIn, context.bindings.baseChores);
     if (!result) return;
 
     var chore = result.chore;

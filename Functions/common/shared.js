@@ -1,6 +1,9 @@
 const KNOWN_USERS = JSON.parse(process.env.KNOWN_USERS);
 const DEFAULT_PRINCIPAL = typeof process.env.DEFAULT_PRINCIPAL === 'string' && process.env.DEFAULT_PRINCIPAL.length > 0 ? process.env.DEFAULT_PRINCIPAL : null;
+const CHORES_JSON_DATA = process.env.CHORES_JSON_DATA;
 const axios = require('axios');
+const { BlobServiceClient } = require('@azure/storage-blob');
+const { v4: uuidv4 } = require('uuid');
 
 async function verify(req, chores, baseChores) {
     if (!req || typeof req.query !== 'object') return "No valid request information";
@@ -8,7 +11,7 @@ async function verify(req, chores, baseChores) {
     const weekId = parseInt(req.query.weekId);
     if (!Number.isInteger(weekId) || weekId <= 2634 || weekId >= 20000) return "Missing week";
     if (typeof chores === 'string') chores = JSON.parse(chores);
-    if (typeof chores !== 'object') chores = await generateNewWeek(req, weekId, baseChores);
+    if (typeof chores !== 'object' && baseChores !== false) chores = await generateNewWeek(req, weekId, baseChores);
 
     const header = req.headers["x-ms-client-principal"] || DEFAULT_PRINCIPAL;
     if (typeof header !== 'string' || !header || header.length === 0) return "Missing authentication header";
@@ -76,7 +79,19 @@ async function generateNewWeek(req, weekId, baseChores) {
     return chores;
 }
 
+async function uploadImage(weekId, dataBuffer) {
+    const client = BlobServiceClient.fromConnectionString(CHORES_JSON_DATA);
+    const container = client.getContainerClient('chores');
+    const name = weekId + '/' + uuidv4() + '.jpg';
+    const blob = container.getBlockBlobClient(name);
+
+    const resp = await blob.upload(dataBuffer, dataBuffer.length);
+
+    return resp.status === 200 ? blob.url : null;
+}
+
 module.exports = {
     verify,
-    getChore
+    getChore,
+    uploadImage
 };
