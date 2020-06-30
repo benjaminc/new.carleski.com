@@ -1,12 +1,13 @@
 <template>
+  <div id="app">
      <div class="detail-item">
         <div class="return">
-            <router-link :to="'/list/' + $route.params.weekId">
+            <a :href="'/list/' + weekId">
                 <ChevronLeft />
                 <div>Return to chores list</div>
-            </router-link>
+            </a>
         </div>
-        <div v-if="!chore || !week">Loading the chore...</div>
+        <div v-if="!chore">Loading the chore...</div>
         <div v-else>
             <h1>{{chore.name}} for the week from {{startDate | formatDate}} to {{endDate | formatDate}}</h1>
             <div class="attribute-list">
@@ -55,18 +56,24 @@
             </div>
         </div>
     </div>
+  </div>
 </template>
 
 <script>
-import ChevronLeft from '../assets/chevron-left.svg'
-import Images from '../assets/images.svg'
-import QuestionCircle from '../assets/question-circle.svg'
-import store from '../store'
+import ChevronLeft from '../../assets/chevron-left.svg'
+import Images from '../../assets/images.svg'
+import QuestionCircle from '../../assets/question-circle.svg'
+import store from '../../store'
 export default {
   components: { ChevronLeft, Images, QuestionCircle },
   data: function () {
+    const paths = window.location.pathname.split(/\//g)
+    const choreId = paths.length > 0 ? paths[paths.length - 1] : null
+    const weekId = paths.length > 1 ? paths[paths.length - 2] : null
     return {
-      week: null,
+      choreId,
+      weekId,
+      state: store.state,
       chore: null,
       selectedSchedule: null,
       selectedTask: null
@@ -102,9 +109,10 @@ export default {
       }
     },
     loadWeek: async function () {
-      const choreId = this.$route.params.choreId
-      if (this.$route.params.weekId) this.week = await store.getWeek(this.$route.params.weekId)
-      const chores = this.week && this.week.chores
+      if (!this.weekId) return
+      const choreId = this.choreId
+      const week = await store.getWeek(this.weekId)
+      const chores = week && week.chores
       if (chores && chores.length && choreId) {
         for (let i = 0; i < chores.length; i++) {
           if (chores[i].choreId === choreId) {
@@ -126,7 +134,27 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#nav {
+  padding: 30px;
+}
+
+#nav a {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+#nav a.router-link-exact-active {
+  color: #42b983;
+}
 .detail-item {
     width: 90%;
     max-width: 1200px;

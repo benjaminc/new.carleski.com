@@ -1,8 +1,17 @@
 <template>
   <div id="app">
-    <router-view/>
+    <div id="home">Routing to the current week...</div>
   </div>
 </template>
+
+<script>
+import store from '../../store'
+export default {
+  mounted: function () {
+    window.location = '/login?post_login_redirect_uri=/list/' + store.computeWeekId()
+  }
+}
+</script>
 
 <style>
 #app {

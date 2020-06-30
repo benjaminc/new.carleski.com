@@ -22,13 +22,13 @@
         },
         {
             "route": "/list/*",
-            "serve": "/index.html",
+            "serve": "/list.html",
             "statusCode": 200,
             "allowedRoles": ["authenticated"]
         },
         {
             "route": "/detail/*",
-            "serve": "/index.html",
+            "serve": "/detail.html",
             "statusCode": 200,
             "allowedRoles": ["authenticated"]
         },
