@@ -1,13 +1,13 @@
 const API_PATH = process.env.VUE_APP_API_PATH
 const DEFAULT_USER = process.env.VUE_APP_DEFAULT_USER ? JSON.parse(process.env.VUE_APP_DEFAULT_USER) : null
 
-const store = {
+window.choresDataStore = window.choresDataStore || {
   debug: true,
   state: {
     weeks: localStorage.weeks ? JSON.parse(localStorage.weeks) : {},
     currentWeek: null,
     currentWeekId: null,
-    user: DEFAULT_USER
+    user: DEFAULT_USER || (sessionStorage.user ? JSON.parse(sessionStorage.user) : null)
   },
   verifyUser: async function () {
     if (this.state.user !== null) return true
@@ -19,6 +19,7 @@ const store = {
 
       if (payload && payload.clientPrincipal) {
         this.state.user = payload.clientPrincipal
+        sessionStorage.user = JSON.stringify(this.state.user)
         return true
       }
     }
@@ -92,4 +93,4 @@ const store = {
   }
 }
 
-export default store
+export default window.choresDataStore
