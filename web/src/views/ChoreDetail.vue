@@ -6,7 +6,7 @@
                 <div>Return to chores list</div>
             </router-link>
         </div>
-        <div v-if="!chore || !state.currentWeek">Loading the chore...</div>
+        <div v-if="!chore">Loading the chore...</div>
         <div v-else>
             <h1>{{chore.name}} for the week from {{startDate | formatDate}} to {{endDate | formatDate}}</h1>
             <div class="attribute-list">
@@ -17,45 +17,9 @@
                 <div class="attribute-item">
                     <div class="header">Status:</div>
                     <div class="simple-detail">{{chore.complete ? 'Passed Off' : 'Not Passed Off'}}</div>
-                </div><form>
-                <div class="schedule" v-for="schedule in chore.schedules" :key="schedule.alias">
-                    <div class="header">{{schedule.name}}</div>
-                    <div class="tasks">
-                        <ol>
-                            <li class="task" v-for="task in schedule.tasks" :key="task.name">
-                                <div class="header">
-                                    <a href="#" @click.prevent.stop="toggleTask(schedule, task)" v-if="task.exampleUrl || task.imageUrls.length">
-                                        {{task.name}}
-                                        <Images v-if="task.imageUrls.length" />
-                                        <QuestionCircle v-if="!isParent && task.exampleUrl" />
-                                    </a>
-                                    <span v-else>{{task.name}}</span>
-                                    <label v-if="isParent">
-                                      <QuestionCircle />
-                                      <input type="file" accept="image/*" capture="camera" style="display:none" @change="uploadFile(schedule, task, $event)" />
-                                    </label>
-                                </div>
-                                <div class="details" v-show="selectedSchedule === schedule.alias && selectedTask === task.name">
-                                    <div class="example" v-if="task.exampleUrl">
-                                        <div class="header">Example</div>
-                                        <img :src="task.exampleUrl" />
-                                    </div>
-                                    <div class="uploads" v-if="task.imageUrls.length">
-                                        <div class="header">Uploaded Images</div>
-                                        <div class="image" v-for="img in task.imageUrls" :key="img.url">
-                                            <div class="header">By {{img.by}} at {{img.at}}</div>
-                                            <img :src="img.url" />
-                                        </div>
-                                    </div>
-                                </div>
-                            </li>
-                        </ol>
-                    </div>
-                </div></form>
-                <div class="history-items" v-if="chore.history.length">
-                    <div class="header">Historical Actions</div>
-                    <div class="history-item" v-for="item in chore.history" :key="item.at">{{item.complete ? 'Completed' : 'Uncompleted'}} at {{item.at}} by {{item.by}}</div>
                 </div>
+                <Schedule :chore="chore" :schedule="schedule" v-for="schedule in chore.schedules" :key="schedule.alias" />
+                <History :history="chore.history" />
             </div>
         </div>
     </div>
@@ -63,17 +27,14 @@
 
 <script>
 import ChevronLeft from '../assets/chevron-left.svg'
-import Images from '../assets/images.svg'
-import QuestionCircle from '../assets/question-circle.svg'
+import Schedule from '../components/Schedule'
+import History from '../components/History'
 import store from '../store'
 export default {
-  components: { ChevronLeft, Images, QuestionCircle },
+  components: { ChevronLeft, Schedule, History },
   data: function () {
     return {
-      state: store.state,
-      chore: null,
-      selectedSchedule: null,
-      selectedTask: null
+      chore: null
     }
   },
   computed: {
@@ -86,10 +47,6 @@ export default {
     endDate: function () {
       const startDate = this.startDate
       return new Date(startDate.getTime() + (6 * 24 * 60 * 60 * 1000))
-    },
-    isParent: function () {
-      const hasRole = this.state.user && this.state.user.userRoles ? this.state.user.userRoles.indexOf('parent') >= 0 : false
-      return hasRole
     }
   },
   filters: {
@@ -100,15 +57,6 @@ export default {
     }
   },
   methods: {
-    toggleTask: function (schedule, task) {
-      if (this.selectedSchedule === schedule.alias && this.selectedTask === task.name) {
-        this.selectedSchedule = null
-        this.selectedTask = null
-      } else {
-        this.selectedSchedule = schedule.alias
-        this.selectedTask = task.name
-      }
-    },
     loadWeek: async function () {
       const choreId = this.$route.params.choreId
       const week = this.$route.params.weekId ? await store.setWeek(this.$route.params.weekId) : null
@@ -121,14 +69,6 @@ export default {
           }
         }
       }
-    },
-    uploadFile: async function (schedule, task, event) {
-      await store.uploadExampleImage(
-        this.$route.params.weekId,
-        this.$route.params.choreId,
-        schedule.alias,
-        task.name,
-        event.target.files[0])
     }
   },
   watch: {
@@ -187,31 +127,5 @@ export default {
 .attribute-item .simple-detail {
     display: inline-block;
     text-align: left;
-}
-.schedule, .history-items {
-    display:block;
-    position:relative;
-    box-shadow:0 2px 0 -1px #ebebeb;
-}
-.schedule > .header, .history-items > .header {
-    font-size: 24px;
-    font-weight: bold;
-    display:block;
-    position:relative;
-    margin: 20px 5px;
-    padding: 8px 0;
-    box-shadow:0 2px 0 -1px #ebebeb;
-}
-.task > .header {
-    text-align: left;
-}
-.task > .header a {
-  color: #3540eb;
-  text-decoration: none;
-}
-.task svg {
-    margin-left: 8px;
-    width: 16px;
-    height: 16px;
 }
 </style>

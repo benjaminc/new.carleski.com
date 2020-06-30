@@ -72,22 +72,23 @@ window.choresDataStore = window.choresDataStore || {
     }
     await me.setWeek(weekId)
   },
-  uploadExampleImage: async function (weekId, choreId, scheduleAlias, taskName, file) {
+  uploadImage: async function (weekId, choreId, scheduleAlias, taskName, file, isExample) {
     const me = this
     const formData = new FormData()
     formData.append('file', file)
 
-    const resp = await fetch(API_PATH + 'UploadExampleImage?weekId=' + encodeURIComponent(weekId) +
+    const resp = await fetch(API_PATH + 'UploadImage?weekId=' + encodeURIComponent(weekId) +
       '&choreId=' + encodeURIComponent(choreId) +
       '&scheduleAlias=' + encodeURIComponent(scheduleAlias) +
-      '&taskName=' + encodeURIComponent(taskName), {
+      '&taskName=' + encodeURIComponent(taskName) +
+      (isExample === true ? '&isExample=true' : ''), {
       method: 'POST',
       body: formData,
       cache: 'no-cache'
     })
 
     if (resp.status !== 200) {
-      if (me.debug) console.log('Invalid UploadExampleImage Response - ' + resp.status)
+      if (me.debug) console.log('Invalid UploadImage Response - ' + resp.status)
     }
     await me.setWeek(weekId)
   }

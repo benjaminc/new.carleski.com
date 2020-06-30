@@ -5,6 +5,7 @@ async function validateRequest(context, req, chores, baseChores) {
     let result = await shared.verify(req, chores, baseChores);
     const scheduleAlias = req.query.scheduleAlias;
     const taskName = req.query.taskName;
+    const isExample = typeof req.query.isExample === 'string' ? (req.query.isExample === 'true') : req.query.isExample;
 
     if (result && result.chore && scheduleAlias && taskName) {
         for (let i = 0; i < result.chore.schedules.length && !result.task; i++) {
@@ -45,19 +46,27 @@ async function validateRequest(context, req, chores, baseChores) {
         return false;
     }
 
+    if (isExample && !result.auth.user.isParent) {
+        context.log('Not a parent making the request');
+        context.res = { status: 403 };
+        return false;
+    }
+
     result.upload = upload;
+    result.isExample = isExample;
 
     return result;
 }
 
 module.exports = async function (context, req) {  
-    context.log('Got UploadExampleImage request'); 
+    context.log('Got UploadImage request'); 
 
     const result = await validateRequest(context, req, context.bindings.choresIn, context.bindings.baseChores);
     if (!result) return;
 
     const imageUrl = await shared.uploadImage(result.weekId, result.upload.data);
-    result.task.exampleUrl = imageUrl;
+    if (result.isExample) result.task.exampleUrl = imageUrl;
+    else result.task.imageUrls.push(imageUrl);
 
     context.bindings.choresOut = result.chores;
 };
