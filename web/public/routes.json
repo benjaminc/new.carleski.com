@@ -21,6 +21,10 @@
             "allowedRoles": ["authenticated"]
         },
         {
+            "route": "/",
+            "serve": "/index.html"
+        },
+        {
             "route": "/*",
             "serve": "/index.html",
             "statusCode": 200,
