@@ -5,8 +5,11 @@
 <script>
 import store from '../store'
 export default {
-  mounted: function () {
-    this.$router.push('/list/' + store.computeWeekId())
+  mounted: async function () {
+    const response = await fetch('/.auth/me')
+    const payload = await response.json()
+    if (!payload) window.location = '/login'
+    else this.$router.push('/list/' + store.computeWeekId())
   }
 }
 </script>
