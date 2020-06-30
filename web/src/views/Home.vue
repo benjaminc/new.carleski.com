@@ -6,7 +6,7 @@
 import store from '../store'
 export default {
   mounted: function () {
-    this.$router.push('/list/' + store.computeWeekId())
+    window.location = '/login?post_login_redirect_uri=' + encodeURIComponent('/list/' + store.computeWeekId())
   }
 }
 </script>
