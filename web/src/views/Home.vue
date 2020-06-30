@@ -5,15 +5,11 @@
 <script>
 import store from '../store'
 export default {
+  created: async function () {
+    if (!(await store.verifyUser())) window.location = '/login'
+  },
   mounted: async function () {
-    const response = await fetch('/.auth/me')
-    if (response.status === 200) {
-      const payload = await response.json()
-      if (payload && payload.clientPrincipal) {
-        store.setUser(payload.clientPrincipal)
-        this.$router.push('/list/' + store.computeWeekId())
-      } else window.location = '/login'
-    } else window.location = '/login'
+    this.$router.push('/list/' + store.computeWeekId())
   }
 }
 </script>

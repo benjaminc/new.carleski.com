@@ -9,8 +9,21 @@ const store = {
     currentWeekId: null,
     user: DEFAULT_USER
   },
-  setUser: function (user) {
-    this.user = user
+  verifyUser: async function () {
+    if (this.state.user !== null) return true
+
+    const resp = await fetch('/.auth/me')
+
+    if (resp.status === 200) {
+      const payload = await resp.json()
+
+      if (payload && payload.clientPrincipal) {
+        this.state.user = payload.clientPrincipal
+        return true
+      }
+    }
+
+    return false
   },
   setWeek: function (weekId) {
     const me = this

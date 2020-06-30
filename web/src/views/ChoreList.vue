@@ -49,6 +49,9 @@ export default {
       await this.loadWeek()
     }
   },
+  created: async function () {
+    if (!(await store.verifyUser())) window.location = '/login'
+  },
   mounted: async function () {
     await this.loadWeek()
   }
