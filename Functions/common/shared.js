@@ -5,13 +5,13 @@ const axios = require('axios');
 const { BlobServiceClient } = require('@azure/storage-blob');
 const { v4: uuidv4 } = require('uuid');
 
-async function verify(req, chores, baseChores) {
+async function verify(req, chores, baseChores, viewOnly) {
     if (!req || typeof req.query !== 'object') return "No valid request information";
 
     const weekId = parseInt(req.query.weekId);
     if (!Number.isInteger(weekId) || weekId <= 2634 || weekId >= 20000) return "Missing week";
     if (typeof chores === 'string') chores = JSON.parse(chores);
-    if (typeof chores !== 'object' && baseChores !== false) chores = await generateNewWeek(req, weekId, baseChores);
+    if (typeof chores !== 'object' && baseChores !== false) chores = await generateNewWeek(req, weekId, baseChores, viewOnly);
 
     const header = req.headers["x-ms-client-principal"] || DEFAULT_PRINCIPAL;
     if (typeof header !== 'string' || !header || header.length === 0) return "Missing authentication header";
@@ -44,8 +44,12 @@ function getChore(chores, choreId) {
     return null;
 }
 
-async function generateNewWeek(req, weekId, baseChores) {
-    if (weekId > 2635) {
+async function generateNewWeek(req, weekId, baseChores, viewOnly) {
+    const currentWeekId = Math.round(Date.now() / (7 * 24 * 60 * 60 * 1000));
+    const inFuture = Number.isInteger(weekId) && weekId > currentWeekId
+    var lastWeekChores = null;
+
+    if (weekId > 2635 && (!viewOnly || !inFuture)) {
         let headers = {
             'Cache-Control': 'no-cache'
         };
@@ -54,7 +58,7 @@ async function generateNewWeek(req, weekId, baseChores) {
         const resp = await axios.get(new URL('GetChores?weekId=' + (weekId - 1), req.url).href, {headers});
         if (resp.status === 200) {
             const payload = resp.data;
-            if (payload && payload.weekId) return payload;
+            if (payload && payload.weekId && payload.chores) lastWeekChores = payload.chores;
         }
     }
 
@@ -71,8 +75,10 @@ async function generateNewWeek(req, weekId, baseChores) {
 
     for (var i = 0; i < chores.chores.length; i++) {
         let chore = chores.chores[i];
+        const lastWeek = getChore(lastWeekChores, chore.choreId) || {};
+
         if (!chore.defaultAssignee) chore.defaultAssignee = users[(weekId + i + 3) % users.length];
-        if (!chore.assignedTo) chore.assignedTo = chore.defaultAssignee;
+        if (!chore.assignedTo) chore.assignedTo = lastWeek.assignedTo || chore.defaultAssignee;
         if (!chore.nextAssignee) chore.nextAssignee = users[(weekId + i + 4) % users.length];
     }
 

@@ -1,7 +1,7 @@
 const shared = require('../common/shared');
 
 async function validateRequest(context, req, chores, baseChores) {
-    let result = await shared.verify(req, chores, baseChores);
+    let result = await shared.verify(req, chores, baseChores, true);
 
     if (typeof result !== 'object') {
         context.log('Invalid request - ' + JSON.stringify(req));

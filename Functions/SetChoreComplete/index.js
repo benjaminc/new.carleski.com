@@ -1,9 +1,9 @@
 const shared = require('../common/shared');
 const axios = require('axios');
 
-async function validateRequest(context, req, chores) {
+async function validateRequest(context, req, chores, baseChores) {
     const complete = typeof req.query.complete === 'string' && (req.query.complete === 'true' || req.query.complete === 'false') ? req.query.complete === 'true' : req.query.complete;
-    let result = await shared.verify(req, chores);
+    let result = await shared.verify(req, chores, baseChores);
     if (typeof result !== 'object' || !result.chore || typeof complete !== 'boolean') {
         context.log('Invalid request - ' + JSON.stringify(req));
         context.res = { status: 500 };
