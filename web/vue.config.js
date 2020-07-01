@@ -23,11 +23,11 @@ module.exports = {
         start_url: '/'
       },
       iconPaths: {
-        favicon32: '/img/favicon-32x32.png',
-        favicon16: '/img/favicon-16x16.png',
-        appleTouchIcon: '/img/apple-touch-icon.png',
-        maskIcon: '/img/maskable_icon.png',
-        msTileImage: '/img/android-chrome-192x192.png'
+        favicon32: 'img/favicon-32x32.png',
+        favicon16: 'img/favicon-16x16.png',
+        appleTouchIcon: 'img/apple-touch-icon.png',
+        maskIcon: 'img/maskable_icon.png',
+        msTileImage: 'img/android-chrome-192x192.png'
       }
     }
   }
