@@ -1,13 +1,18 @@
 {
-  "name": "web",
+  "name": "chore-chart",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "capacitor-copy": "vue-cli-service capacitor-copy",
+    "capacitor-init": "vue-cli-service capacitor-init",
+    "capacitor-open": "vue-cli-service capacitor-open",
+    "capacitor-update": "vue-cli-service capacitor-update"
   },
   "dependencies": {
+    "@vue/cli-plugin-pwa": "^4.4.6",
     "core-js": "^3.6.5",
     "vue": "^2.6.11",
     "vue-router": "^3.3.4"
