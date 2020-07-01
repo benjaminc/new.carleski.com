@@ -19,29 +19,6 @@
         {
             "route": "/api/*",
             "allowedRoles": ["authenticated"]
-        },
-        {
-            "route": "/js/*",
-            "allowedRoles": ["anonymous"]
-        },
-        {
-            "route": "/css/*",
-            "allowedRoles": ["anonymous"]
-        },
-        {
-            "route": "/favicon.ico",
-            "allowedRoles": ["anonymous"]
-        },
-        {
-            "route": "/",
-            "serve": "/index.html",
-            "allowedRoles": ["anonymous"]
-        },
-        {
-            "route": "/*",
-            "serve": "/index.html",
-            "statusCode": 200,
-            "allowedRoles": ["authenticated"]
         }
     ],
     "platformErrorOverrides": [
