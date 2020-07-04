@@ -3,8 +3,8 @@
         <div class="header">
             <a href="#" @click.prevent.stop="expanded = !expanded">
                 {{task.name}}
-                <Images v-if="task.imageUrls.length" />
                 <QuestionCircle v-if="task.exampleUrl" />
+                <Images v-if="task.imageUrls.length" />
             </a>
         </div>
         <div class="details" v-show="expanded">
@@ -16,8 +16,8 @@
                         <input type="file" accept="image/*" capture="camera" style="display:none" @change="uploadImage($event, true)" />
                     </label>
                 </div>
-                <div>
-                    <img :src="task.exampleUrl" v-if="task.exampleUrl" />
+                <div v-if="task.exampleUrl">
+                    <img :src="task.exampleUrl" />
                 </div>
             </div>
             <div class="uploads">

@@ -66,7 +66,7 @@ module.exports = async function (context, req) {
 
     const imageUrl = await shared.uploadImage(result.weekId, result.upload.data);
     if (result.isExample) result.task.exampleUrl = imageUrl;
-    else result.task.imageUrls.push(imageUrl);
+    else result.task.imageUrls.push({ by: result.auth.user.name, at: new Date().toString(), url: imageUrl });
 
     context.bindings.choresOut = result.chores;
 };

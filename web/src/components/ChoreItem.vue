@@ -9,10 +9,14 @@
         {{chore.name}} - <strong>{{chore.assignedTo}}</strong>
         </label>
     </span>
-    <span class="chore-details" title="details">
-        <Images v-if="hasImages" />
-        <InfoCircle />
-    </span>
+    <div class="chore-details" title="details">
+        <div>
+            <Images v-if="hasImages" />
+        </div>
+        <div>
+            <InfoCircle />
+        </div>
+    </div>
   </span>
 </template>
 
@@ -163,16 +167,22 @@ input[type="checkbox"]{
     display:block;
     position:absolute;
     height:36px;
-    width:36px;
+    width:100px;
     line-height:36px;
     right:0;
     top:12px;
-    text-align:center;
+    text-align:right;
     color:#d8d8d8;
     cursor: pointer;
 }
+.chore-details div {
+    display:inline-block;
+}
 .chore-details svg {
     color:#d8d8d8;
+    width: 36px;
+    height: 36px;
+    margin-left: 8px;
 }
 .chore-wrap:hover .chore-details svg{
     color:#0eb0b7;

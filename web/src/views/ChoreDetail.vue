@@ -34,7 +34,8 @@ export default {
   components: { ChevronLeft, Schedule, History },
   data: function () {
     return {
-      chore: null
+      chore: null,
+      state: store.state
     }
   },
   computed: {
@@ -74,6 +75,19 @@ export default {
   watch: {
     $route: async function (to, from) {
       await this.loadWeek()
+    },
+    'state.currentWeek': function (to, from) {
+      const choreId = this.$route.params.choreId
+      const week = to || this.state.currentWeek
+      const chores = week && week.chores
+      if (chores && chores.length && choreId) {
+        for (let i = 0; i < chores.length; i++) {
+          if (chores[i].choreId === choreId) {
+            this.chore = chores[i]
+            break
+          }
+        }
+      }
     }
   },
   created: async function () {

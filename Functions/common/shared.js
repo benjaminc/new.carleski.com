@@ -91,9 +91,9 @@ async function uploadImage(weekId, dataBuffer) {
     const name = weekId + '/' + uuidv4() + '.jpg';
     const blob = container.getBlockBlobClient(name);
 
-    const resp = await blob.upload(dataBuffer, dataBuffer.length);
+    await blob.upload(dataBuffer, dataBuffer.length);
 
-    return resp.status === 200 ? blob.url : null;
+    return blob.url;
 }
 
 module.exports = {
