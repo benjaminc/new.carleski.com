@@ -13,7 +13,7 @@ async function verify(req, chores, baseChores, viewOnly) {
     if (typeof chores === 'string') chores = JSON.parse(chores);
     if (typeof chores !== 'object' && baseChores !== false) chores = await generateNewWeek(req, weekId, baseChores, viewOnly);
 
-    const header = req.headers["x-ms-client-principal"] || DEFAULT_PRINCIPAL;
+    const header = req.headers["x-ms-client-principal"] || req.headers["x-carleski-chores"] || DEFAULT_PRINCIPAL;
     if (typeof header !== 'string' || !header || header.length === 0) return "Missing authentication header";
     const encoded = Buffer.from(header, "base64");
     const auth = JSON.parse(encoded.toString("ascii"));
