@@ -75,20 +75,20 @@ export default {
     }
   },
   methods: {
-    loadWeek: async function () {
-      await store.setWeek(this.$route.params.weekId)
+    loadWeek: function () {
+      store.setWeek(this.$route.params.weekId)
     }
   },
   watch: {
-    $route: async function (to, from) {
-      await this.loadWeek()
+    $route: function (to, from) {
+      this.loadWeek()
     }
   },
   created: async function () {
     if (!(await store.verifyUser())) window.location = '/login'
   },
-  mounted: async function () {
-    await this.loadWeek()
+  mounted: function () {
+    this.loadWeek()
   }
 }
 </script>
