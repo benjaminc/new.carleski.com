@@ -13,6 +13,9 @@ module.exports = {
     },
     pwa: {
       name: "Chore Chart",
+      workboxOptions: {
+        exclude: ['routes.json']
+      },
       themeColor: "#008000",
       msTileColor: "#404040",
       appleMobileWebAppCapable: 'yes',
