@@ -1,14 +1,14 @@
 <template>
      <div class="detail-item">
         <div class="return">
-            <router-link :to="'/list/' + $route.params.weekId">
+            <router-link :to="backLink">
                 <ChevronLeft />
                 <div>Return to chores list</div>
             </router-link>
         </div>
         <div v-if="!chore">Loading the chore...</div>
         <div v-else>
-            <h1>{{chore.name}} for the week from {{startDate | formatDate}} to {{endDate | formatDate}}</h1>
+            <h1>{{chore.name}} from {{startDate | formatDate}} to {{endDate | formatDate}}</h1>
             <div class="attribute-list">
                 <div class="attribute-item">
                     <div class="header">Assigned To:</div>
@@ -34,13 +34,27 @@ export default {
   components: { ChevronLeft, Schedule, History },
   data: function () {
     return {
-      chore: null,
+      choreId: this.$route.params.choreId,
       state: store.state
     }
   },
   computed: {
+    chore: function () {
+      const choreId = this.choreId
+      const week = this.state.currentWeek
+      const chores = week && week.chores
+      if (chores && chores.length && choreId) {
+        for (let i = 0; i < chores.length; i++) {
+          if (chores[i].choreId === choreId) {
+            return chores[i]
+          }
+        }
+      }
+
+      return null
+    },
     startDate: function () {
-      const weekId = parseInt(this.$route.params.weekId)
+      const weekId = parseInt(this.state.currentWeekId)
       if (!Number.isInteger(weekId)) return null
       const sunday = new Date((weekId - 0.5) * 7 * 24 * 60 * 60 * 1000)
       return new Date(sunday.getFullYear(), sunday.getMonth(), sunday.getDate())
@@ -48,6 +62,9 @@ export default {
     endDate: function () {
       const startDate = this.startDate
       return new Date(startDate.getTime() + (6 * 24 * 60 * 60 * 1000))
+    },
+    backLink: function () {
+      return parseInt(this.state.currentWeekId) !== parseInt(this.state.homeWeekId) ? '/list/' + this.state.currentWeekId : '/'
     }
   },
   filters: {
@@ -59,35 +76,12 @@ export default {
   },
   methods: {
     loadWeek: async function () {
-      const choreId = this.$route.params.choreId
-      const week = this.$route.params.weekId ? await store.setWeek(this.$route.params.weekId) : null
-      const chores = week && week.chores
-      if (chores && chores.length && choreId) {
-        for (let i = 0; i < chores.length; i++) {
-          if (chores[i].choreId === choreId) {
-            this.chore = chores[i]
-            break
-          }
-        }
-      }
+      await store.setWeek(this.$route.params.weekId)
     }
   },
   watch: {
     $route: async function (to, from) {
       await this.loadWeek()
-    },
-    'state.currentWeek': function (to, from) {
-      const choreId = this.$route.params.choreId
-      const week = to || this.state.currentWeek
-      const chores = week && week.chores
-      if (chores && chores.length && choreId) {
-        for (let i = 0; i < chores.length; i++) {
-          if (chores[i].choreId === choreId) {
-            this.chore = chores[i]
-            break
-          }
-        }
-      }
     }
   },
   created: async function () {

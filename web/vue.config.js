@@ -11,10 +11,13 @@ module.exports = {
         .use('vue-svg-loader')
         .loader('vue-svg-loader')
     },
+    css: {
+      sourceMap: true
+    },
     pwa: {
       name: "Chore Chart",
       workboxOptions: {
-        exclude: ['routes.json', 'css/*.css.map']
+        exclude: ['routes.json', 'css/.*.css.map']
       },
       themeColor: "#008000",
       msTileColor: "#404040",

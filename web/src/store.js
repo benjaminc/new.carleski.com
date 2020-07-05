@@ -1,12 +1,19 @@
 const API_PATH = process.env.VUE_APP_API_PATH
 const DEFAULT_USER = process.env.VUE_APP_DEFAULT_USER ? JSON.parse(process.env.VUE_APP_DEFAULT_USER) : (localStorage.user ? JSON.parse(localStorage.user) : null)
 
+const doComputeWeekId = (date) => Math.round(date ? date.getTime() : Date.now() / (7 * 24 * 60 * 60 * 1000))
+const curWeekId = doComputeWeekId()
+const curWeekKey = 'week' + curWeekId
+const storedWeekStr = localStorage.getItem(curWeekKey)
+const storedWeek = storedWeekStr ? JSON.parse(storedWeekStr) : null
+
 window.choresDataStore = window.choresDataStore || {
   debug: true,
   state: {
-    weeks: localStorage.weeks ? JSON.parse(localStorage.weeks) : {},
+    weeks: storedWeek ? { curWeekId: storedWeekStr } : {},
     currentWeek: null,
     currentWeekId: null,
+    homeWeekId: curWeekId,
     user: DEFAULT_USER,
     useCustomHeader: DEFAULT_USER !== null
   },
@@ -30,6 +37,7 @@ window.choresDataStore = window.choresDataStore || {
   setWeek: function (weekId) {
     const me = this
 
+    if (!weekId) weekId = me.computeWeekId()
     if (me.debug) console.log('Setting week ' + weekId)
     me.state.currentWeekId = weekId
     me.state.currentWeek = me.state.weeks[weekId]
@@ -46,7 +54,7 @@ window.choresDataStore = window.choresDataStore || {
           resp.json().then(function (body) {
             const data = typeof body === 'string' ? JSON.parse(body) : body
             me.state.weeks[weekId] = data
-            localStorage.weeks = JSON.stringify(me.state.weeks)
+            localStorage.setItem('week' + weekId, JSON.stringify(me.state.weeks))
             if (me.state.currentWeekId === weekId) me.state.currentWeek = data
             resolve(data)
           }, function (err) {
@@ -58,10 +66,7 @@ window.choresDataStore = window.choresDataStore || {
       })
     })
   },
-  computeWeekId: function (date) {
-    const ms = date ? date.getTime() : Date.now()
-    return Math.round(ms / (7 * 24 * 60 * 60 * 1000))
-  },
+  computeWeekId: doComputeWeekId,
   setChoreComplete: async function (weekId, choreId, complete) {
     const me = this
     const options = { cache: 'no-cache' }

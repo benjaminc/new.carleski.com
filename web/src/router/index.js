@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
 import ChoreList from '../views/ChoreList.vue'
 import ChoreDetail from '../views/ChoreDetail.vue'
 
@@ -10,7 +9,7 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: ChoreList
   },
   {
     path: '/list/:weekId',
