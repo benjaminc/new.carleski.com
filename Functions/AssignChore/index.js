@@ -15,6 +15,12 @@ async function validateRequest(context, req, chores, baseChores) {
         return false;
     }
 
+    if (!result.auth.user.isParent) {
+        context.log('Not a parent making the request');
+        context.res = { status: 403 };
+        return false;
+    }
+
     result.assignedTo = req.query.assignedTo;
 
     return result;

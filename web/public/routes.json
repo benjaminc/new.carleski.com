@@ -7,30 +7,6 @@
         {
             "route": "/logout",
             "serve": "/.auth/logout"
-        },
-        {
-            "route": "/api/SetChoreComplete",
-            "allowedRoles": ["parent"]
-        },
-        {
-            "route": "/api/AssignChore",
-            "allowedRoles": ["parent"]
-        },
-        {
-            "route": "/api/*",
-            "allowedRoles": ["authenticated"]
-        },
-        {
-            "route": "/list/*",
-            "serve": "/index.html",
-            "statusCode": 200,
-            "allowedRoles": ["authenticated"]
-        },
-        {
-            "route": "/detail/*",
-            "serve": "/index.html",
-            "statusCode": 200,
-            "allowedRoles": ["authenticated"]
         }
     ],
     "platformErrorOverrides": [
