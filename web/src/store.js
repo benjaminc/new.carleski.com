@@ -9,13 +9,13 @@ const storedWeek = storedWeekStr ? JSON.parse(storedWeekStr) : null
 
 window.choresDataStore = window.choresDataStore || {
   debug: true,
+  useCustomHeader: DEFAULT_USER !== null,
   state: {
     weeks: storedWeek ? { curWeekId: storedWeekStr } : {},
     currentWeek: null,
     currentWeekId: null,
     homeWeekId: curWeekId,
-    user: DEFAULT_USER,
-    useCustomHeader: DEFAULT_USER !== null
+    user: DEFAULT_USER
   },
   verifyUser: async function () {
     if (this.state.user !== null) return true
@@ -45,7 +45,7 @@ window.choresDataStore = window.choresDataStore || {
     return new Promise(function (resolve, reject) {
       if (me.debug) console.log('Getting from server')
       const options = { cache: 'no-cache' }
-      if (me.useCustomHeader && me.user) options.headers = { 'x-carleski-chores': btoa(JSON.stringify(me.user)) }
+      if (me.useCustomHeader && me.state.user) options.headers = { 'x-carleski-chores': btoa(JSON.stringify(me.state.user)) }
       fetch(API_PATH + 'GetChores?weekId=' + encodeURIComponent(weekId), options).then(function (resp) {
         if (resp.status !== 200) {
           if (me.debug) console.log('Invalid GetChores Response - ' + resp.status)
@@ -70,7 +70,7 @@ window.choresDataStore = window.choresDataStore || {
   setChoreComplete: async function (weekId, choreId, complete) {
     const me = this
     const options = { cache: 'no-cache' }
-    if (me.useCustomHeader && me.user) options.headers = { 'x-carleski-chores': btoa(JSON.stringify(me.user)) }
+    if (me.useCustomHeader && me.state.user) options.headers = { 'x-carleski-chores': btoa(JSON.stringify(me.state.user)) }
     const resp = await fetch(API_PATH + 'SetChoreComplete?weekId=' + encodeURIComponent(weekId) + '&choreId=' + encodeURIComponent(choreId) + '&complete=' + (complete === true), options)
 
     if (resp.status !== 200) {
@@ -84,7 +84,7 @@ window.choresDataStore = window.choresDataStore || {
     formData.append('file', file)
 
     const options = { method: 'POST', body: formData, cache: 'no-cache' }
-    if (me.useCustomHeader && me.user) options.headers = { 'x-carleski-chores': btoa(JSON.stringify(me.user)) }
+    if (me.useCustomHeader && me.state.user) options.headers = { 'x-carleski-chores': btoa(JSON.stringify(me.state.user)) }
     const resp = await fetch(API_PATH + 'UploadImage?weekId=' + encodeURIComponent(weekId) +
       '&choreId=' + encodeURIComponent(choreId) +
       '&scheduleAlias=' + encodeURIComponent(scheduleAlias) +
