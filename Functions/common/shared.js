@@ -54,6 +54,7 @@ async function generateNewWeek(req, weekId, baseChores, viewOnly) {
             'Cache-Control': 'no-cache'
         };
         if (req.headers['x-ms-client-principal']) headers['x-ms-client-principal'] = req.headers['x-ms-client-principal'];
+        if (req.headers['x-carleski-chores']) headers['x-carleski-chores'] = req.headers['x-carleski-chores'];
 
         const resp = await axios.get(new URL('GetChores?weekId=' + (weekId - 1), req.url).href, {headers});
         if (resp.status === 200) {
@@ -70,16 +71,18 @@ async function generateNewWeek(req, weekId, baseChores, viewOnly) {
     for (var key in KNOWN_USERS) {
         const user = KNOWN_USERS[key];
         if (!user.name || user.rotates !== true) continue;
-        users.push(user.name);
+        users.push({name: user.name, sort: user.sort});
     }
+
+    users.sort((a, b) => a.sort - b.sort);
 
     for (var i = 0; i < chores.chores.length; i++) {
         let chore = chores.chores[i];
         const lastWeek = getChore(lastWeekChores, chore.choreId) || {};
 
-        if (!chore.defaultAssignee) chore.defaultAssignee = users[(weekId + i + 3) % users.length];
+        if (!chore.defaultAssignee) chore.defaultAssignee = users[(weekId - (i + 1)) % users.length].name;
         if (!chore.assignedTo) chore.assignedTo = lastWeek.assignedTo || chore.defaultAssignee;
-        if (!chore.nextAssignee) chore.nextAssignee = users[(weekId + i + 4) % users.length];
+        if (!chore.nextAssignee) chore.nextAssignee = users[(weekId - (i + 2)) % users.length].name;
     }
 
     return chores;
