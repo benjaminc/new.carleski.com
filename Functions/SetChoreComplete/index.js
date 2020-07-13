@@ -43,6 +43,7 @@ async function updateNextWeek(req, nextWeekId, chore) {
         'Cache-Control': 'no-cache'
     };
     if (req.headers['x-ms-client-principal']) headers['x-ms-client-principal'] = req.headers['x-ms-client-principal'];
+    if (req.headers['x-carleski-chores']) headers['x-carleski-chores'] = req.headers['x-carleski-chores'];
 
     await axios.get(url.href, { headers });
 }
