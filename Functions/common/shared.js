@@ -44,8 +44,12 @@ function getChore(chores, choreId) {
     return null;
 }
 
+function getCurrentWeekId() {
+    return Math.round(Date.now() / (7 * 24 * 60 * 60 * 1000));
+}
+
 async function generateNewWeek(req, weekId, baseChores, viewOnly) {
-    const currentWeekId = Math.round(Date.now() / (7 * 24 * 60 * 60 * 1000));
+    const currentWeekId = getCurrentWeekId();
     const inFuture = Number.isInteger(weekId) && weekId > currentWeekId
     var lastWeekChores = null;
 
@@ -102,5 +106,6 @@ async function uploadImage(weekId, dataBuffer) {
 module.exports = {
     verify,
     getChore,
-    uploadImage
+    uploadImage,
+    getCurrentWeekId
 };
